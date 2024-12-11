@@ -22,11 +22,11 @@ class Database {
         users.append(user)
     }
 
-    func deleteUser(user: User) {
+    static func deleteUser(user: User) {
         Database.users.removeAll(where: { $0.id == user.id })
     }
     
-    func getUser(id: UUID) -> User? {
+    static func getUser(id: UUID) -> User? {
         Database.users.first(where: { $0.id == id })
     }
     

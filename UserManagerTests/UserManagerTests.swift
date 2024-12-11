@@ -10,27 +10,84 @@ import XCTest
 
 final class UserManagerTests: XCTestCase {
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+    func whenIsFieldsValid_givenAllFields_thenReturnTrue() {
+        let userInfo = UserInfo(firstName: "Merianni", lastName: "Nunez", age: 90)
+        let userAccount = UserAccount(email: "merianni@gmail.com", password: "12345678")
+        let user = User(userInfo: userInfo, userAccount: userAccount, id: UUID())
+        let userManager = UserManager(user: user, userAccount: userAccount, userInfo: userInfo)
+        
+        XCTAssertTrue(userManager.isFieldsValid())
+    }
+    
+    func whenIsFieldsValid_givenMissingFields_thenReturnFalse() {
+        let userInfo = UserInfo(firstName: "", lastName: "Nunez", age: 90)
+        let userAccount = UserAccount(email: "merianni@gmail.com", password: "12345678")
+        let user = User(userInfo: userInfo, userAccount: userAccount, id: UUID())
+        let userManager = UserManager(user: user, userAccount: userAccount, userInfo: userInfo)
+        
+        XCTAssertTrue(userManager.isFieldsValid())
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    func whenIsAgeValid_givenValidAge_thenReturnTrue() {
+        let userInfo = UserInfo(firstName: "Merianni", lastName: "Nunez", age: 90)
+        let userAccount = UserAccount(email: "merianni@gmail.com", password: "12345678")
+        let user = User(userInfo: userInfo, userAccount: userAccount, id: UUID())
+        let userManager = UserManager(user: user, userAccount: userAccount, userInfo: userInfo)
+        
+        XCTAssertTrue(userManager.isAgeValid(age: 90))
     }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+    
+    func whenIsAgeValid_givenUnderage_thenReturnFalse() {
+        let userInfo = UserInfo(firstName: "Merianni", lastName: "Nunez", age: 9)
+        let userAccount = UserAccount(email: "merianni@gmail.com", password: "12345678")
+        let user = User(userInfo: userInfo, userAccount: userAccount, id: UUID())
+        let userManager = UserManager(user: user, userAccount: userAccount, userInfo: userInfo)
+        
+        XCTAssertFalse(userManager.isAgeValid(age: 9))
     }
-
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
+    
+    func whenRegisterUser_givenValidUserInfo_thenReturnTrue() {
+        let userInfo = UserInfo(firstName: "Merianni", lastName: "Nunez", age: 90)
+        let userAccount = UserAccount(email: "merianni@gmail.com", password: "12345678")
+        let user = User(userInfo: userInfo, userAccount: userAccount, id: UUID())
+        let userManager = UserManager(user: user, userAccount: userAccount, userInfo: userInfo)
+        
+        userManager.register(user: user)
+        XCTAssertTrue(Database.getUser(id: user.id) != nil)
     }
-
+    
+    func whenRegisterUse_giveInvalidInfo_thenReturnFalse() {
+        let userInfo = UserInfo(firstName: "", lastName: "", age: 90)
+        let userAccount = UserAccount(email: "merianni@gmail.com", password: "12345678")
+        let user = User(userInfo: userInfo, userAccount: userAccount, id: UUID())
+        let userManager = UserManager(user: user, userAccount: userAccount, userInfo: userInfo)
+        
+        userManager.register(user: user)
+        XCTAssertFalse(Database.getUser(id: user.id) != nil)
+    }
+    
+    func whenAuthenticatingUser_giveValidInfo_thenReturnTrue() {
+        let userInfo = UserInfo(firstName: "Merianni", lastName: "Nunez", age: 90)
+        let userAccount = UserAccount(email: "merianni@gmail.com", password: "12345678")
+        let user = User(userInfo: userInfo, userAccount: userAccount, id: UUID())
+        Database.addUser(user: user)
+        
+        let userManager = UserManager(user: user, userAccount: userAccount, userInfo: userInfo)
+        XCTAssertTrue(userManager.authenticateUser(id: user.id, email: "merianni@gmail.com", password: "12345678"))
+    }
+    
+    func whenAuthenticatingUser_givenInvalidInfo_thenReturnFalse() {
+        let userInfo = UserInfo(firstName: "Merianni", lastName: "Nunez", age: 90)
+        let userAccount = UserAccount(email: "merianni@gmail.com", password: "securePassword")
+        let user = User(userInfo: userInfo, userAccount: userAccount, id: UUID())
+        Database.addUser(user: user)
+        
+        let userManager = UserManager(user: user, userAccount: userAccount, userInfo: userInfo)
+        XCTAssertFalse(userManager.authenticateUser(id: user.id, email: "merianni@gmail.com", password: "wrongPassword"))
+    }
+    
+    func whenAuthenticatingNonExistingUser_givenValidInfo_thenReturnFalse() {
+        let userManager = UserManager(user: User(userInfo: UserInfo(firstName: "", lastName: "", age: 0), userAccount: UserAccount(email: "", password: ""), id: UUID()), userAccount: UserAccount(email: "", password: ""), userInfo: UserInfo(firstName: "", lastName: "", age: 0))
+        XCTAssertFalse(userManager.authenticateUser(id: UUID(), email: "merianni@gmail.com", password: "12345678"))
+    }
 }

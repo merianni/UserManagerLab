@@ -80,6 +80,15 @@ class UserManager {
         }
         return true
     }
+    
+    func authenticate(email: String, password: String) -> Bool {
+        return userAccount.email == email && userAccount.password == password
+    }
+    
+    func authenticateUser(id: UUID, email: String, password: String) -> Bool {
+        guard let user = Database.getUser(id: id) else { return false }
+        return user.userAccount.email == email && user.userAccount.password == password
+    }
 }
 
 
